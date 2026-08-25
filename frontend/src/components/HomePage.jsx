@@ -72,7 +72,7 @@ export default function HomePage({ refreshKey }) {
       {/* Top Navbar */}
       <header className="home-header">
         <div className="home-brand">
-          <span className="brand-icon">⚜️</span>
+          <span className="brand-icon"></span>
           <h1>Knight</h1>
         </div>
         <div className="home-search-bar">
