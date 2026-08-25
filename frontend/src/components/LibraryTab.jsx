@@ -32,6 +32,12 @@ export default function LibraryTab({ refreshKey }) {
     return <div className="library-empty">No notes yet. Record your first one from the Record tab.</div>;
   }
 
+  function handleNoteUpdate(updatedNote) {
+    setNotes((prevNotes) =>
+      prevNotes.map((n) => (n.id === updatedNote.id ? updatedNote : n))
+    );
+  }
+
   return (
     <div className="library-list">
       {notes.map((note) => (
@@ -44,7 +50,9 @@ export default function LibraryTab({ refreshKey }) {
               {note.created_at ? new Date(note.created_at).toLocaleString() : ''}
             </div>
           </div>
-          {openId === note.id && <NoteCard note={note} />}
+          {openId === note.id && (
+            <NoteCard note={note} onUpdate={handleNoteUpdate} />
+          )}
         </div>
       ))}
     </div>

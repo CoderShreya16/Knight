@@ -2,6 +2,7 @@ import { useState } from 'react';
 import RecordTab from './components/RecordTab.jsx';
 import LibraryTab from './components/LibraryTab.jsx';
 import AskTab from './components/AskTab.jsx';
+import HomePage from './components/HomePage.jsx';
 
 export default function App() {
   const [open, setOpen] = useState(false);
@@ -9,19 +10,14 @@ export default function App() {
   const [refreshKey, setRefreshKey] = useState(0);
 
   function handleNoteCreated() {
-    // bump the key so LibraryTab refetches next time it's opened
+    // bump the key so HomePage and LibraryTab refetch
     setRefreshKey((k) => k + 1);
   }
 
   return (
     <>
-      {/* Replace this with your own landing page / app content */}
-      <main style={{ padding: '60px 40px', maxWidth: 720, margin: '0 auto' }}>
-        <h1 style={{ fontFamily: 'Cambria, serif', color: '#1b1f3b' }}>Knight</h1>
-        <p style={{ color: '#6b6b7b' }}>
-          Your voice-first notes assistant lives in the bottom-right corner. Tap it to start.
-        </p>
-      </main>
+      {/* Notion-quality landing home page */}
+      <HomePage refreshKey={refreshKey} />
 
       {open && (
         <div className="knight-panel" role="dialog" aria-label="Knight notes assistant">
@@ -67,9 +63,14 @@ export default function App() {
         </div>
       )}
 
-      <button className="knight-bubble" onClick={() => setOpen((o) => !o)} aria-label="Toggle Knight">
+      <button
+        className={`knight-bubble ${open ? 'panel-open' : ''}`}
+        onClick={() => setOpen((o) => !o)}
+        aria-label="Toggle Knight"
+      >
         {open ? '✕' : '🎙'}
       </button>
     </>
   );
 }
+

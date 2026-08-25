@@ -45,3 +45,12 @@ export async function explain(question, tag) {
   });
   return handle(res); // { answer }
 }
+
+export async function updateNote(id, fields) {
+  const res = await fetch(`${BASE_URL}/notes/${encodeURIComponent(id)}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(fields),
+  });
+  return handle(res); // returns the updated note object
+}

@@ -17,6 +17,7 @@ app.use('/', require('./routes/structureNote'));
 app.use('/', require('./routes/lectureNote'));
 app.use('/', require('./routes/notes'));
 app.use('/', require('./routes/explain'));
+app.use('/', require('./routes/updateNote'));
 
 const PORT = process.env.PORT || 5173;
 app.listen(PORT, () => {
