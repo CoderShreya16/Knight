@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.post('/structure-note', async (req, res) => {
   try {
-    const { transcript } = req.body;
+    const { transcript, save = true } = req.body;
 
     const completion = await groq.chat.completions.create({
       model: 'openai/gpt-oss-120b',
@@ -23,6 +23,11 @@ router.post('/structure-note', async (req, res) => {
       parsed = JSON.parse(raw);
     } catch {
       return res.status(500).json({ error: 'Failed to parse LLM response' });
+    }
+
+    if (!save) {
+      const { content, subject_tag, chapter_tag } = parsed;
+      return res.json({ content, subject_tag, chapter_tag });
     }
 
     const { data, error } = await supabase

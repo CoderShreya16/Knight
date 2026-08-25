@@ -16,14 +16,15 @@ export async function transcribeAudio(blob) {
   return handle(res); // { transcript }
 }
 
-export async function createNote(transcript, mode) {
+export async function createNote(transcript, mode, save = true) {
   const path = mode === 'lecture' ? '/lecture-note' : '/structure-note';
   const res = await fetch(`${BASE_URL}${path}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ transcript }),
+    body: JSON.stringify({ transcript, save }),
   });
-  return handle(res); // { id, content, subject_tag, chapter_tag, mode, created_at }
+  return handle(res); // save=true → { id, content, subject_tag, chapter_tag, mode, created_at }
+                      // save=false → { content, subject_tag, chapter_tag }
 }
 
 export async function listNotes() {

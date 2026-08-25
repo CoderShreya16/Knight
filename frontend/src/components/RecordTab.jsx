@@ -2,7 +2,8 @@ import { useRef, useState, useEffect } from 'react';
 import { transcribeAudio, createNote } from '../api.js';
 import NoteCard from './NoteCard.jsx';
 
-const CHUNK_MS = 60_000; // rotate every 60 seconds
+const CHUNK_MS    = 60_000;  // rotate every 60 seconds
+const PREVIEW_MS  = 120_000; // generate a live note preview every 2 minutes
 
 const STAGES = {
   idle:       'idle',
@@ -19,6 +20,7 @@ export default function RecordTab({ onNoteCreated }) {
   const [lastNote,         setLastNote]         = useState(null);
   const [transcriptPieces, setTranscriptPieces] = useState([]); // ordered array of completed chunk texts
   const [elapsed,          setElapsed]          = useState(0);  // seconds since recording started
+  const [livePreview,      setLivePreview]      = useState(null); // latest unsaved note preview
 
   // --- refs (survive re-renders, don't cause re-renders) ---
   const streamRef        = useRef(null);  // single getUserMedia stream, alive for whole session
@@ -28,12 +30,18 @@ export default function RecordTab({ onNoteCreated }) {
   const cycleTimerRef    = useRef(null);  // setInterval handle for chunk rotation
   const elapsedTimerRef  = useRef(null);  // setInterval handle for the mm:ss clock
   const finalResolveRef  = useRef(null);  // set just before final stop; resolved when last chunk finishes
+  const previewTimerRef  = useRef(null);  // setInterval handle for the 2-minute live-preview cycle
+  const modeRef          = useRef('note'); // mirrors mode state — readable in async callbacks without stale closure
+
+  // Keep modeRef in sync so async preview callbacks always read the latest value
+  useEffect(() => { modeRef.current = mode; }, [mode]);
 
   // Clean up on unmount
   useEffect(() => {
     return () => {
       clearInterval(cycleTimerRef.current);
       clearInterval(elapsedTimerRef.current);
+      clearInterval(previewTimerRef.current);
       streamRef.current?.getTracks().forEach(t => t.stop());
     };
   }, []);
@@ -105,12 +113,29 @@ export default function RecordTab({ onNoteCreated }) {
 
   // --- main actions ---
 
+  /**
+   * Fire a save:false createNote call with whatever transcript has accumulated so far.
+   * Runs on its own PREVIEW_MS interval — completely independent of the chunk cycle.
+   * Failures are swallowed: one bad call never interrupts the recording.
+   */
+  async function generateLivePreview() {
+    const partial = transcriptRef.current.filter(Boolean).join(' ').trim();
+    if (!partial) return; // nothing transcribed yet — skip silently
+    try {
+      const preview = await createNote(partial, modeRef.current, false);
+      setLivePreview(preview);
+    } catch (err) {
+      console.error('[Knight] Live preview failed:', err.message);
+    }
+  }
+
   async function startRecording() {
     setError('');
     setLastNote(null);
+    setLivePreview(null);
     setTranscriptPieces([]);
-    transcriptRef.current  = [];
-    segmentIdxRef.current  = 0;
+    transcriptRef.current   = [];
+    segmentIdxRef.current   = 0;
     finalResolveRef.current = null;
 
     try {
@@ -130,6 +155,9 @@ export default function RecordTab({ onNoteCreated }) {
       // Rotate every CHUNK_MS
       cycleTimerRef.current = setInterval(cycleSegment, CHUNK_MS);
 
+      // Live preview every PREVIEW_MS — independent of chunk cycle
+      previewTimerRef.current = setInterval(generateLivePreview, PREVIEW_MS);
+
     } catch {
       setError('Microphone access was denied or is unavailable.');
       setStage(STAGES.error);
@@ -137,9 +165,10 @@ export default function RecordTab({ onNoteCreated }) {
   }
 
   async function stopRecording() {
-    // Kill the rotation timer and clock immediately
+    // Kill all interval timers immediately
     clearInterval(cycleTimerRef.current);
     clearInterval(elapsedTimerRef.current);
+    clearInterval(previewTimerRef.current);
 
     setStage(STAGES.processing);
 
@@ -245,7 +274,15 @@ export default function RecordTab({ onNoteCreated }) {
         {error && <div className="error-box">{error}</div>}
       </div>
 
-      {/* Final structured note — same as before */}
+      {/* Live "Notes so far" preview — shown while recording, replaced by final note on stop */}
+      {!lastNote && livePreview && (
+        <div className="live-preview-wrapper">
+          <p className="live-preview-label">Notes so far</p>
+          <NoteCard note={livePreview} />
+        </div>
+      )}
+
+      {/* Final structured note — persisted to Supabase, replaces preview */}
       {lastNote && <NoteCard note={lastNote} />}
     </div>
   );
