@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.post('/structure-note', async (req, res) => {
   try {
-    const { transcript, save = true } = req.body;
+    const { transcript, save = true, device_id } = req.body;
 
     const completion = await groq.chat.completions.create({
       model: 'openai/gpt-oss-120b',
@@ -32,7 +32,7 @@ router.post('/structure-note', async (req, res) => {
 
     const { data, error } = await supabase
       .from('notes')
-      .insert({ ...parsed, mode: 'note' })
+      .insert({ ...parsed, mode: 'note', device_id })
       .select()
       .single();
 

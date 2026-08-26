@@ -6,7 +6,22 @@ const router = express.Router();
 router.patch('/notes/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { content, subject_tag, chapter_tag } = req.body;
+    const { content, subject_tag, chapter_tag, device_id } = req.body;
+
+    // Retrieve existing note to check device_id
+    const { data: existingNote, error: fetchError } = await supabase
+      .from('notes')
+      .select('device_id')
+      .eq('id', id)
+      .single();
+
+    if (fetchError || !existingNote) {
+      return res.status(404).json({ error: 'Note not found' });
+    }
+
+    if (existingNote.device_id !== device_id) {
+      return res.status(403).json({ error: "Not authorized to edit this note" });
+    }
 
     // Build the update object from only the fields present in the body
     const updates = {};
@@ -22,10 +37,6 @@ router.patch('/notes/:id', async (req, res) => {
       .single();
 
     if (error) throw error;
-
-    if (!data) {
-      return res.status(404).json({ error: 'Note not found' });
-    }
 
     res.json(data);
   } catch (err) {

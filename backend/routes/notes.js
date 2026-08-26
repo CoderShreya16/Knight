@@ -7,9 +7,15 @@ const router = express.Router();
 
 router.get('/notes', async (req, res) => {
   try {
+    const { device_id } = req.query;
+    if (!device_id) {
+      return res.json([]);
+    }
+
     const { data, error } = await supabase
       .from('notes')
       .select('*')
+      .eq('device_id', device_id)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -24,10 +30,12 @@ router.get('/notes', async (req, res) => {
 router.get('/notes/:tag', async (req, res) => {
   try {
     const { tag } = req.params;
+    const { device_id } = req.query;
 
     const { data: notes, error } = await supabase
       .from('notes')
       .select('*')
+      .eq('device_id', device_id || '')
       .or(`subject_tag.ilike."${tag}",chapter_tag.ilike."${tag}"`);
 
     if (error) throw error;

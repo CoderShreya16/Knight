@@ -7,11 +7,12 @@ const router = express.Router();
 
 router.post('/explain', async (req, res) => {
   try {
-    const { question, tag } = req.body;
+    const { question, tag, device_id } = req.body;
 
     const { data: notes, error } = await supabase
       .from('notes')
       .select('*')
+      .eq('device_id', device_id || '')
       .or(`subject_tag.ilike."${tag}",chapter_tag.ilike."${tag}"`);
 
     if (error) throw error;
