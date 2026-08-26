@@ -1,6 +1,15 @@
 import { useEffect, useState } from 'react';
+import { Search, Sparkles, ArrowRight } from 'lucide-react';
 import { listNotes } from '../api.js';
 import NoteDetailModal from './NoteDetailModal.jsx';
+import KnightMark from './KnightMark.jsx';
+
+const SUBJECT_HUES = ['#6c63ff', '#ff7a59', '#2e9e6c', '#c0392b', '#b06a1a', '#3d6bb3'];
+function hueForSubject(subject) {
+  let hash = 0;
+  for (let i = 0; i < subject.length; i++) hash = subject.charCodeAt(i) + ((hash << 5) - hash);
+  return SUBJECT_HUES[Math.abs(hash) % SUBJECT_HUES.length];
+}
 
 export default function HomePage({ refreshKey }) {
   const [notes, setNotes] = useState([]);
@@ -72,10 +81,11 @@ export default function HomePage({ refreshKey }) {
       {/* Top Navbar */}
       <header className="home-header">
         <div className="home-brand">
-          <span className="brand-icon"></span>
+          <KnightMark size={22} />
           <h1>Knight</h1>
         </div>
         <div className="home-search-bar">
+          <Search className="search-icon" />
           <input
             type="text"
             placeholder="Search notes, subjects, chapters..."
@@ -94,14 +104,16 @@ export default function HomePage({ refreshKey }) {
           </div>
         ) : filteredNotes.length === 0 ? (
           <div className="home-empty">
-            <div className="empty-graphic">✨</div>
+            <div className="empty-graphic">
+              <Sparkles size={26} />
+            </div>
             <h2>Start your knowledge base</h2>
             <p>
               Capture ideas, lectures, and meetings instantly. Click the recording bubble in the bottom right corner to start.
             </p>
             <div className="empty-pointer">
               <span>Try speaking now</span>
-              <span className="pointer-arrow">➡️</span>
+              <ArrowRight className="pointer-arrow" />
             </div>
           </div>
         ) : (
@@ -109,7 +121,7 @@ export default function HomePage({ refreshKey }) {
             {Object.keys(groups).map((subject) => (
               <section key={subject} className="subject-section">
                 <h3 className="subject-title">
-                  <span className="subject-bullet" />
+                  <span className="subject-bullet" style={{ background: hueForSubject(subject) }} />
                   {subject}
                 </h3>
                 <div className="notes-grid">
@@ -117,6 +129,7 @@ export default function HomePage({ refreshKey }) {
                     <article
                       key={note.id}
                       className="note-grid-card"
+                      style={{ '--card-accent': hueForSubject(subject) }}
                       onClick={() => setSelectedNote(note)}
                     >
                       <div className="note-card-meta">

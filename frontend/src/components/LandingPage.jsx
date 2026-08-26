@@ -6,8 +6,11 @@ import {
   MessageCircle,
   Zap,
   Pencil,
-  ArrowRight
+  ArrowRight,
+  ArrowDown,
+  Check
 } from 'lucide-react';
+import KnightMark from './KnightMark.jsx';
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -58,7 +61,7 @@ export default function LandingPage() {
       {/* Top Navbar */}
       <header className="landing-header">
         <div className="landing-brand">
-          <span className="brand-logo"></span>
+          <KnightMark size={24} />
           <h1>Knight</h1>
         </div>
         <button className="btn-workspace-nav" onClick={() => navigate('/workspace')}>
@@ -68,25 +71,77 @@ export default function LandingPage() {
 
       {/* Hero Section */}
       <section className="landing-hero">
-        <span className="hero-eyebrow">Voice-first AI notes</span>
-        <h2 className="hero-title">
-          Knight
-        </h2>
-        <h3 className="hero-tagline">
-          We don't just listen — we understand you.
-        </h3>
-        <p className="hero-description">
-          Speak naturally and let AI transcribe, clean, structure, and tag your thoughts. Focus entirely on the lecture or meeting, and let Knight do the organization.
-        </p>
-        <div className="hero-actions">
-          <button className="btn-primary" onClick={() => navigate('/workspace')}>
-            Go to Workspace
-          </button>
-          <a href="#how-it-works" className="btn-secondary" onClick={handleScrollToHowItWorks}>
-            See how it works
-          </a>
+        <div className="hero-copy">
+          <span className="hero-eyebrow">A voice-first notes assistant</span>
+          <h2 className="hero-title">
+            Your notes have<br />
+            <span className="accent-line">zero effort</span> left<br />
+            to give.
+          </h2>
+          <p className="hero-description">
+            Speak naturally and Knight transcribes, filters, structures, and tags it
+            — while you stay focused on the lecture or meeting, not your keyboard.
+          </p>
+          <div className="hero-actions">
+            <button className="btn-primary" onClick={() => navigate('/workspace')}>
+              Go to Workspace
+            </button>
+            <a href="#how-it-works" className="btn-secondary" onClick={handleScrollToHowItWorks}>
+              See how it works
+            </a>
+          </div>
+          <span className="hero-caption">Built for students who are done typing.</span>
+        </div>
+
+        <div className="hero-visual">
+          <div className="process-card">
+            <div className="process-side process-side-input">
+              <span className="process-label">You speak</span>
+              <div className="waveform" aria-hidden="true">
+                {Array.from({ length: 14 }).map((_, i) => (
+                  <span className="wave-bar" key={i} style={{ animationDelay: `${i * 90}ms` }} />
+                ))}
+              </div>
+            </div>
+
+            <div className="process-connector">
+              <ArrowDown className="process-arrow" />
+            </div>
+
+            <div className="process-side process-side-output">
+              <span className="process-label process-label-dark">Knight writes</span>
+              <div className="output-lines">
+                <div className="output-line" style={{ animationDelay: '150ms' }}>
+                  <Check className="output-check" />
+                  <span>Newton's First Law — inertia</span>
+                </div>
+                <div className="output-line" style={{ animationDelay: '400ms' }}>
+                  <Check className="output-check" />
+                  <span>Force = mass × acceleration</span>
+                </div>
+                <div className="output-line" style={{ animationDelay: '650ms' }}>
+                  <Check className="output-check" />
+                  <span>Applies only to inertial frames</span>
+                </div>
+              </div>
+              <span className="process-tag">Physics · Auto-tagged</span>
+            </div>
+          </div>
         </div>
       </section>
+
+      {/* Marquee ticker */}
+      <div className="marquee-band">
+        <div className="marquee-track">
+          {Array.from({ length: 2 }).map((_, i) => (
+            <div className="marquee-item-group" style={{ display: 'flex' }} key={i}>
+              {['Physics', 'Chemistry', 'Biology', 'Meetings', 'Lectures', 'Mathematics', 'History', 'Computer Science'].map((subject) => (
+                <span className="marquee-item" key={subject}>{subject} ✦</span>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
 
       {/* Features Grid */}
       <section className="landing-features">

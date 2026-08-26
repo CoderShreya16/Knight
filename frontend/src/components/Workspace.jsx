@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { X, Mic } from 'lucide-react';
 import RecordTab from './RecordTab.jsx';
 import LibraryTab from './LibraryTab.jsx';
 import AskTab from './AskTab.jsx';
 import HomePage from './HomePage.jsx';
+import KnightMark from './KnightMark.jsx';
 
 export default function Workspace() {
   const [open, setOpen] = useState(false);
@@ -22,9 +24,12 @@ export default function Workspace() {
       {open && (
         <div className="knight-panel" role="dialog" aria-label="Knight notes assistant">
           <div className="knight-header">
-            <h1>Knight</h1>
+            <div className="knight-header-brand">
+              <KnightMark size={20} light />
+              <h1>Knight</h1>
+            </div>
             <button className="knight-close" onClick={() => setOpen(false)} aria-label="Close">
-              ✕
+              <X size={18} />
             </button>
           </div>
 
@@ -68,7 +73,7 @@ export default function Workspace() {
         onClick={() => setOpen((o) => !o)}
         aria-label="Toggle Knight"
       >
-        {open ? '✕' : '🎙'}
+        {open ? <X size={26} /> : <Mic size={26} />}
       </button>
     </>
   );
